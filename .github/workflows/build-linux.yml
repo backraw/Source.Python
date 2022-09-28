@@ -1,0 +1,141 @@
+name: Build Linux libraries
+
+on:
+  push
+
+# env:
+#   GAME_NAMES: "blade bms csgo css dods gmod hl2dm l4d2 tf2"
+#   RELEASE_DIRS: "addons cfg logs resource sound"
+
+jobs:
+  linux-scratch:
+    uses: ./.github/workflows/linux-scratch.yml
+    with:
+      owner: ${{ github.actor }}
+    secrets:
+      registry_password: ${{ secrets.GITHUB_TOKEN }}
+
+  linux-docker:
+    uses: ./.github/workflows/linux-docker.yml
+    with:
+      owner: ${{ github.actor }}
+    secrets:
+      registry_password: ${{ secrets.GITHUB_TOKEN }}
+    needs: linux-scratch
+
+  linux-blade:
+    uses: ./.github/workflows/linux-libraries.yml
+    with:
+      owner: ${{ github.actor }}
+      game: blade
+    secrets:
+      registry_password: ${{ secrets.GITHUB_TOKEN }}
+    needs: [linux-scratch, linux-docker]
+
+  linux-bms:
+    uses: ./.github/workflows/linux-libraries.yml
+    with:
+      owner: ${{ github.actor }}
+      game: bms
+    secrets:
+      registry_password: ${{ secrets.GITHUB_TOKEN }}
+    needs: [linux-scratch, linux-docker]
+
+  linux-csgo:
+    uses: ./.github/workflows/linux-libraries.yml
+    with:
+      owner: ${{ github.actor }}
+      game: csgo
+    secrets:
+      registry_password: ${{ secrets.GITHUB_TOKEN }}
+    needs: [linux-scratch, linux-docker]
+
+  linux-css:
+    uses: ./.github/workflows/linux-libraries.yml
+    with:
+      owner: ${{ github.actor }}
+      game: css
+    secrets:
+      registry_password: ${{ secrets.GITHUB_TOKEN }}
+    needs: [linux-scratch, linux-docker]
+
+  linux-dods:
+    uses: ./.github/workflows/linux-libraries.yml
+    with:
+      owner: ${{ github.actor }}
+      game: dods
+    secrets:
+      registry_password: ${{ secrets.GITHUB_TOKEN }}
+    needs: [linux-scratch, linux-docker]
+
+  linux-gmod:
+    uses: ./.github/workflows/linux-libraries.yml
+    with:
+      owner: ${{ github.actor }}
+      game: gmod
+    secrets:
+      registry_password: ${{ secrets.GITHUB_TOKEN }}
+    needs: [linux-scratch, linux-docker]
+
+  linux-hl2dm:
+    uses: ./.github/workflows/linux-libraries.yml
+    with:
+      owner: ${{ github.actor }}
+      game: hl2dm
+    secrets:
+      registry_password: ${{ secrets.GITHUB_TOKEN }}
+    needs: [linux-scratch, linux-docker]
+
+  linux-l4d2:
+    uses: ./.github/workflows/linux-libraries.yml
+    with:
+      owner: ${{ github.actor }}
+      game: l4d2
+    secrets:
+      registry_password: ${{ secrets.GITHUB_TOKEN }}
+    needs: [linux-scratch, linux-docker]
+
+  linux-tf2:
+    uses: ./.github/workflows/linux-libraries.yml
+    with:
+      owner: ${{ github.actor }}
+      game: tf2
+    secrets:
+      registry_password: ${{ secrets.GITHUB_TOKEN }}
+    needs: [linux-scratch, linux-docker]
+
+  linux-release:
+    runs-on: ubuntu-22.04
+    needs: [linux-blade, linux-bms, linux-csgo, linux-css, linux-dods, linux-gmod, linux-hl2dm, linux-l4d2, linux-tf2]
+    steps:
+      # download all artifacts
+      - uses: actions/download-artifact@v3
+        with:
+          name: linux-blade-${{ github.sha }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: linux-bms-${{ github.sha }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: linux-csgo-${{ github.sha }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: linux-css-${{ github.sha }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: linux-dods-${{ github.sha }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: linux-gmod-${{ github.sha }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: linux-hl2dm-${{ github.sha }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: linux-l4d2-${{ github.sha }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: linux-tf2-${{ github.sha }}
+
+      - name: List downloaded artifacts
+        run: ls -lha

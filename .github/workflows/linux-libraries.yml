@@ -1,0 +1,42 @@
+on:
+  workflow_call:
+    inputs:
+      owner:
+        type: string
+        required: true
+      game:
+        type: string
+        required: true
+    secrets:
+      registry_password:
+        required: true
+
+jobs:
+  build:
+    permissions:
+      contents: read
+    runs-on: ubuntu-22.04
+    container:
+      image: "ghcr.io/${{ inputs.owner }}/source-python:linux-build"
+      credentials:
+        username: ${{ inputs.owner }}
+        password: ${{ secrets.registry_password }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Linux game libraries
+        run: |
+          cd src
+          chmod +x Build.sh
+          export NUM_CORES=$(nproc)
+
+          bash ./Build.sh ${{ inputs.game }}
+          cd ..
+
+          mkdir -p release/${{ inputs.game }}
+          mv src/Builds/Linux/${{ inputs.game }}/core.so release/${{ inputs.game }}
+          mv src/Builds/Linux/${{ inputs.game }}/source-python.so release/${{ inputs.game }}
+      - uses: actions/upload-artifact@v3
+        name: Upload built artifacts
+        with:
+          name: linux-${{ inputs.game }}-${{ github.sha }}
+          path: release

@@ -1,0 +1,43 @@
+on:
+  workflow_call:
+    inputs:
+      owner:
+        type: string
+        required: true
+    secrets:
+      registry_password:
+        required: true
+
+jobs:
+  build:
+    permissions:
+      contents: read
+      packages: write
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ inputs.owner }}
+          password: ${{ secrets.registry_password }}
+
+      - name: Check if image exists
+        id: checkimage
+        run: |
+          echo ::set-output name=build::$(docker run --rm ${CRANE_IMAGE} ls ${GHCR_REPOSITORY} | grep "linux-build")
+        env:
+          CRANE_IMAGE: "gcr.io/go-containerregistry/crane:v0.11.0"
+          GHCR_REPOSITORY: ghcr.io/${{ inputs.owner }}/source-python
+
+      - uses: actions/checkout@v3
+        if: ${{ steps.checkimage.outputs.build == 0 }}
+
+      - name: Build Linux image
+        if: ${{ steps.checkimage.outputs.build == 0 }}
+        run: |
+          docker build -t ${GHCR_IMAGE} .github/docker/linux
+          docker push ${GHCR_IMAGE}
+        env:
+          DOCKER_BUILDKIT: 1
+          GHCR_IMAGE: ghcr.io/${{ inputs.owner }}/source-python:linux-build

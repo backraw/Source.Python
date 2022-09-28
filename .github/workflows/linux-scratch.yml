@@ -1,0 +1,35 @@
+on:
+  workflow_call:
+    inputs:
+      owner:
+        type: string
+        required: true
+    secrets:
+      registry_password:
+        required: true
+
+jobs:
+  push:
+    permissions:
+      contents: read
+      packages: write
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ inputs.owner }}
+          password: ${{ secrets.registry_password }}
+
+      - name: Push scratch image to repository so we can look it up
+        run: |
+          mkdir -p scratch
+          echo "FROM scratch" > scratch/Dockerfile
+          echo "ENV unused=0" >> scratch/Dockerfile
+
+          docker build -t ${SCRATCH_IMAGE} scratch
+          docker push ${SCRATCH_IMAGE}
+        env:
+          DOCKER_BUILDKIT: 1
+          SCRATCH_IMAGE: ghcr.io/${{ inputs.owner }}/source-python:linux-scratch
