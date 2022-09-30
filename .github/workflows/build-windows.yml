@@ -1,0 +1,90 @@
+name: Build Windows libraries
+
+on:
+  push
+
+# env:
+#   GAME_NAMES: "blade bms csgo css dods gmod hl2dm l4d2 tf2"
+#   RELEASE_DIRS: "addons cfg logs resource sound"
+
+jobs:
+  windows-blade:
+    uses: ./.github/workflows/windows-libraries.yml
+    with:
+      game: blade
+
+  # windows-bms:
+  #   uses: ./.github/workflows/windows-libraries.yml
+  #   with:
+  #     game: bms
+
+  # windows-csgo:
+  #   uses: ./.github/workflows/windows-libraries.yml
+  #   with:
+  #     game: csgo
+
+  # windows-css:
+  #   uses: ./.github/workflows/windows-libraries.yml
+  #   with:
+  #     game: css
+
+  # windows-dods:
+  #   uses: ./.github/workflows/windows-libraries.yml
+  #   with:
+  #     game: dods
+
+  # windows-gmod:
+  #   uses: ./.github/workflows/windows-libraries.yml
+  #   with:
+  #     game: gmod
+
+  # windows-hl2dm:
+  #   uses: ./.github/workflows/windows-libraries.yml
+  #   with:
+  #     game: hl2dm
+
+  # windows-l4d2:
+  #   uses: ./.github/workflows/windows-libraries.yml
+  #   with:
+  #     game: l4d2
+
+  # windows-tf2:
+  #   uses: ./.github/workflows/windows-libraries.yml
+  #   with:
+  #     game: tf2
+
+  # windows-release:
+  #   runs-on: windows-2022
+  #   needs: [windows-blade, windows-bms, windows-csgo, windows-css, windows-dods, windows-gmod, windows-hl2dm, windows-l4d2, windows-tf2]
+  #   steps:
+  #     # download all artifacts
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: windows-blade-${{ github.sha }}
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: windows-bms-${{ github.sha }}
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: windows-csgo-${{ github.sha }}
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: windows-css-${{ github.sha }}
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: windows-dods-${{ github.sha }}
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: windows-gmod-${{ github.sha }}
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: windows-hl2dm-${{ github.sha }}
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: windows-l4d2-${{ github.sha }}
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: windows-tf2-${{ github.sha }}
+
+  #     - name: List downloaded artifacts
+  #       run: ls -lha

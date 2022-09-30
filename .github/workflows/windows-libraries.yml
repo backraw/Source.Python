@@ -1,0 +1,52 @@
+on:
+  workflow_call:
+    inputs:
+      game:
+        type: string
+        required: true
+
+jobs:
+  build:
+    permissions:
+      contents: read
+    runs-on: windows-latest
+    steps:
+      - name: Install prerequisits
+        shell: powershell
+        # stolen from https://github.com/symbols-worldwide/docker-vs2008-vs2010/blob/master/Dockerfile
+        run: |
+          choco config set --name commandExecutionTimeoutSeconds --value 21600
+          choco install windows-sdk-7.1 vcredist2010
+
+          copy "C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\IDE\msobj80.dll" "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin"
+          copy "C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\IDE\mspdb80.dll" "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin"
+          copy "C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\IDE\mspdbcore.dll" "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin"
+          copy "C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\IDE\mspdbsrv.exe" "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin"
+      - uses: actions/checkout@v4
+      - name: Build Windows game libraries
+        shell: powershell
+        run: |
+          cd src
+
+          $branchdir=".\hl2sdk\${{ inputs.game }}"
+          mkdir $branchdir
+
+          git clone -b ${{ inputs.game }} https://github.com/alliedmodders/hl2sdk.git $branchdir
+          xcopy .\patches\${{ inputs.game }} $branchdir /y/s
+
+          $builddir=".\Builds\Windows\${{ inputs.game }}"
+          mkdir $builddir
+
+          cmake . -B"$builddir" -G"Visual Studio 12 2013" -T "v100" -DBRANCH=${{ inputs.game }}
+          msbuild "$builddir\source-python.sln" /p:Configuration="Release"
+
+          mkdir release\${{ inputs.game }}
+          ls src\Builds
+
+          #move src\Builds\Linux\${{ inputs.game }}\core.so release\${{ inputs.game }}
+          #move src\Builds\Linux\${{ inputs.game }}\source-python.so release\${{ inputs.game }}
+      # - uses: actions/upload-artifact@v3
+      #   name: Upload built artifacts
+      #   with:
+      #     name: windows-${{ inputs.game }}-${{ github.sha }}
+      #     path: release
